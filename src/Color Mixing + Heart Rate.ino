@@ -71,7 +71,6 @@ void setup() {
   BlueBee.begin(9600); // set baudrate according to BlueBee 4.0 baudrate
   BlueBee.println("BlueBee ready");
   Serial.begin(9600);
-
   Palatis::SoftPWM.begin(120);
   resetColors();
   for (int thisReading = 0; thisReading < numReadings; thisReading++) {
@@ -82,10 +81,24 @@ void setup() {
 void loop(){
   readBluetooth();
   ColorControl();
-  // ReceiveHeartData
+  ReceiveHeartData();
 }
 
 void ColorControl(){
+  while (readbuffer[0] == 10 && readbuffer[1] == 10) {
+    Serial.print(readbuffer[0]);
+    Serial.print(", ");
+    Serial.println(readbuffer[1]);
+    i = readbuffer[1];
+    for (int j = 0; j < 2; j++) {
+      readbuffer[j] = 0;
+      delay(1);
+    }
+    resetColors();
+    i = 0;
+    rb = 0;
+    break;
+  }
   while (readbuffer[0] == 170) {
     Serial.print(readbuffer[0]);
     Serial.print(", ");
@@ -97,6 +110,7 @@ void ColorControl(){
     }
     setColor(DeepBlue, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 187) {
@@ -110,6 +124,7 @@ void ColorControl(){
     }
     setColor(Blue, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 204) {
@@ -123,6 +138,7 @@ void ColorControl(){
     }
     setColor(Green, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 221) {
@@ -136,6 +152,7 @@ void ColorControl(){
     }
     setColor(Lime, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 238) {
@@ -149,6 +166,7 @@ void ColorControl(){
     }
     setColor(Yellow, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 255) {
@@ -162,6 +180,7 @@ void ColorControl(){
     }
     setColor(Amber, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 160) {
@@ -175,6 +194,7 @@ void ColorControl(){
     }
     setColor(Red, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 176) {
@@ -188,6 +208,7 @@ void ColorControl(){
     }
     setColor(White1, i);
     i = 0;
+    rb = 0;
     break;
   }
   while (readbuffer[0] == 192) {
@@ -201,6 +222,7 @@ void ColorControl(){
     }
     setColor(White2, i);
     i = 0;
+    rb = 0;
     break;
   }
 }
@@ -238,31 +260,77 @@ void resetColors(){
   setColor(Red, 0);
   setColor(White1, 0);
   setColor(White2, 0);
+  rb = 0;
 }
 
 void ReceiveHeartData(){
-  while (BlueBee.available() > 0) {
-    previousMillis = currentMillis;
-    heartRate = BlueBee.read(); // read the incoming byte:
-    BlueBee.print("Heart-rate: ");
-    BlueBee.println(heartRate);
-    total = total - heartRateIndex[readIndex]; // subtract the last reading:
-    heartRateIndex[readIndex] = heartRate; // read from ReceiveBluetoothData()
-    total = total + heartRateIndex[readIndex]; // add the reading to the total:
-    readIndex = readIndex + 1; // advance to the next position in the array:
-    if (readIndex >= numReadings) {   // if we're at the end of the array...
-    averageHeartRate = total / numReadings;   // calculate the average:
-    BlueBee.print("Average heart-rate: ");
-    BlueBee.println(averageHeartRate);
-    BlueBee.println("*****************************");
-    readIndex = 0;     // ...wrap around to the beginning:
+  while (readbuffer[0] == 10 && readbuffer[1] == 10) {
+    Serial.print(readbuffer[0]);
+    Serial.print(", ");
+    Serial.println(readbuffer[1]);
+    i = readbuffer[1];
+    for (int j = 0; j < 2; j++) {
+      readbuffer[j] = 0;
+      delay(1);
     }
-  delay(1);        // delay in between reads for stability
-  break;
+    resetColors();
+    i = 0;
+    rb = 0;
+    break;
   }
+  while (readbuffer[0] == 69) {
+    // while (BlueBee.available() > 0) {
+      Serial.print(readbuffer[0]);
+      Serial.print(", ");
+      Serial.println(readbuffer[1]);
+      previousMillis = currentMillis;
+      heartRate = readbuffer[1];
+      // heartRate = BlueBee.read(); // read the incoming byte:
+      Serial.print("Heart-rate: ");
+      Serial.println(heartRate);
+      total = total - heartRateIndex[readIndex]; // subtract the last reading:
+      heartRateIndex[readIndex] = heartRate; // read from ReceiveBluetoothData()
+      total = total + heartRateIndex[readIndex]; // add the reading to the total:
+      readIndex = readIndex + 1; // advance to the next position in the array:
+      if (readIndex >= numReadings) {   // if we're at the end of the array...
+      averageHeartRate = total / numReadings;   // calculate the average:
+      Serial.print("Average heart-rate: ");
+      Serial.println(averageHeartRate);
+      Serial.println("*****************************");
+      readIndex = 0;     // ...wrap around to the beginning:
+    }
+    // delay(1);        // delay in between reads for stability
+    for (int j = 0; j < 2; j++) {
+      readbuffer[j] = 0;
+      rb = 0;
+      delay(1);
+    }
   // heart rate range from 50 ---> 135
   // if(averageHeartRate < 60){averageHeartRate = 60;}
   // if(averageHeartRate > 100){averageHeartRate = 100;}
+  if(averageHeartRate < 110){
+    setColor(DeepBlue, 0);
+    setColor(Blue, 0);
+    setColor(Green, 0);
+    setColor(Lime, 100);
+    setColor(Yellow, 0);
+    setColor(Amber, 0);
+    setColor(Red, 0);
+    setColor(White1, 0);
+    setColor(White2, 0);
+  } else if(averageHeartRate > 110){
+    setColor(DeepBlue, 0);
+    setColor(Blue, 0);
+    setColor(Green, 0);
+    setColor(Lime, 0);
+    setColor(Yellow, 100);
+    setColor(Amber, 0);
+    setColor(Red, 0);
+    setColor(White1, 0);
+    setColor(White2, 0);
+  }
+  break;
+}
   // j = (averageHeartRate - 60) * 6;
   // k = (100 - averageHeartRate) * 6;
   // analogWrite(warmLED, j);
