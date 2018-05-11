@@ -37,7 +37,7 @@ with the default 256 PWM levels (0 ~ 255). */
 SOFTPWM_DEFINE_OBJECT(20);
 
 const int numReadings = 1;
-int fadeSpeed = 7;
+int fadeSpeed = 5;
 // const long interval = 5000;            // timeout for dust sensor
 // const long automatic_interval = 6000; // timeout for automatic mode
 
@@ -277,15 +277,22 @@ void setColor(int _Color, int _value, int _previousValue){
 }
 
 void resetColors(){
-  Palatis::SoftPWM.set(DeepBlue, 0);
-  Palatis::SoftPWM.set(Blue, 0);
-  Palatis::SoftPWM.set(Green, 0);
-  Palatis::SoftPWM.set(Lime, 0);
-  Palatis::SoftPWM.set(Yellow, 0);
-  Palatis::SoftPWM.set(Amber, 0);
-  Palatis::SoftPWM.set(Red, 0);
-  Palatis::SoftPWM.set(White1, 0);
-  Palatis::SoftPWM.set(White2, 0);
+  setColor(DeepBlue, 0, previousDB);
+  setColor(Blue, 0, previousB);
+  setColor(Green, 0, previousG);
+  setColor(Lime, 0, previousL);
+  setColor(Yellow, 0, previousY);
+  setColor(Amber, 0, previousA);
+  setColor(Red, 0, previousR);
+  setColor(White1, 0, previousW1);
+  setColor(White2, 0, previousW2);
+  // Palatis::SoftPWM.set(Green, 0);
+  // Palatis::SoftPWM.set(Lime, 0);
+  // Palatis::SoftPWM.set(Yellow, 0);
+  // Palatis::SoftPWM.set(Amber, 0);
+  // Palatis::SoftPWM.set(Red, 0);
+  // Palatis::SoftPWM.set(White1, 0);
+  // Palatis::SoftPWM.set(White2, 0);
   previousDB = 0;
   previousB = 0;
   previousG = 0;
@@ -295,6 +302,7 @@ void resetColors(){
   previousR = 0;
   previousW1 = 0;
   previousW2 = 0;
+  lastColor = 0;
   rb = 0;
 }
 
@@ -317,9 +325,27 @@ void ReceiveHeartData(){
         Palatis::SoftPWM.set(DeepBlue, 255);
       }
       else if(lastColor == 1){
+        previousDB = 255;
+        previousB = 0;
+        previousG = 0;
+        previousL = 0;
+        previousY = 0;
+        previousA = 0;
+        previousR = 0;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 1;
+      previousDB = 255;
+      previousB = 0;
+      previousG = 0;
+      previousL = 0;
+      previousY = 0;
+      previousA = 0;
+      previousR = 0;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(Blue, 0);
       Palatis::SoftPWM.set(Green, 0);
       Palatis::SoftPWM.set(Lime, 0);
@@ -337,9 +363,27 @@ void ReceiveHeartData(){
         FadeInOut(Blue, DeepBlue, fadeSpeed);
       }
       else if(lastColor == 2){
+        previousDB = 0;
+        previousB = 255;
+        previousG = 0;
+        previousL = 0;
+        previousY = 0;
+        previousA = 0;
+        previousR = 0;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 2;
+      previousDB = 0;
+      previousB = 255;
+      previousG = 0;
+      previousL = 0;
+      previousY = 0;
+      previousA = 0;
+      previousR = 0;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(DeepBlue, 0);
       Palatis::SoftPWM.set(Green, 0);
       Palatis::SoftPWM.set(Lime, 0);
@@ -357,9 +401,27 @@ void ReceiveHeartData(){
         FadeInOut(Green, Blue, fadeSpeed);
       }
       else if(lastColor == 3){
+        previousDB = 0;
+        previousB = 0;
+        previousG = 255;
+        previousL = 0;
+        previousY = 0;
+        previousA = 0;
+        previousR = 0;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 3;
+      previousDB = 0;
+      previousB = 0;
+      previousG = 255;
+      previousL = 0;
+      previousY = 0;
+      previousA = 0;
+      previousR = 0;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(DeepBlue, 0);
       Palatis::SoftPWM.set(Blue, 0);
       Palatis::SoftPWM.set(Lime, 0);
@@ -377,9 +439,27 @@ void ReceiveHeartData(){
         FadeInOut(Lime, Green, fadeSpeed);
       }
       else if(lastColor == 4){
+        previousDB = 0;
+        previousB = 0;
+        previousG = 0;
+        previousL = 255;
+        previousY = 0;
+        previousA = 0;
+        previousR = 0;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 4;
+      previousDB = 0;
+      previousB = 0;
+      previousG = 0;
+      previousL = 255;
+      previousY = 0;
+      previousA = 0;
+      previousR = 0;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(DeepBlue, 0);
       Palatis::SoftPWM.set(Blue, 0);
       Palatis::SoftPWM.set(Green, 0);
@@ -397,9 +477,27 @@ void ReceiveHeartData(){
         FadeInOut(Yellow, Lime, fadeSpeed);
       }
       else if(lastColor == 5){
+        previousDB = 0;
+        previousB = 0;
+        previousG = 0;
+        previousL = 0;
+        previousY = 255;
+        previousA = 0;
+        previousR = 0;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 5;
+      previousDB = 0;
+      previousB = 0;
+      previousG = 0;
+      previousL = 0;
+      previousY = 255;
+      previousA = 0;
+      previousR = 0;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(DeepBlue, 0);
       Palatis::SoftPWM.set(Blue, 0);
       Palatis::SoftPWM.set(Green, 0);
@@ -417,9 +515,27 @@ void ReceiveHeartData(){
         FadeInOut(Amber, Yellow, fadeSpeed);
       }
       else if(lastColor == 6){
+        previousDB = 0;
+        previousB = 0;
+        previousG = 0;
+        previousL = 0;
+        previousY = 0;
+        previousA = 255;
+        previousR = 0;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 6;
+      previousDB = 0;
+      previousB = 0;
+      previousG = 0;
+      previousL = 0;
+      previousY = 0;
+      previousA = 255;
+      previousR = 0;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(DeepBlue, 0);
       Palatis::SoftPWM.set(Blue, 0);
       Palatis::SoftPWM.set(Green, 0);
@@ -437,9 +553,27 @@ void ReceiveHeartData(){
         FadeInOut(Red, Amber, fadeSpeed);
       }
       else if(lastColor == 7){
+        previousDB = 0;
+        previousB = 0;
+        previousG = 0;
+        previousL = 0;
+        previousY = 0;
+        previousA = 0;
+        previousR = 255;
+        previousW1 = 0;
+        previousW2 = 0;
         break;
       }
       lastColor = 7;
+      previousDB = 0;
+      previousB = 0;
+      previousG = 0;
+      previousL = 0;
+      previousY = 0;
+      previousA = 0;
+      previousR = 255;
+      previousW1 = 0;
+      previousW2 = 0;
       Palatis::SoftPWM.set(DeepBlue, 0);
       Palatis::SoftPWM.set(Blue, 0);
       Palatis::SoftPWM.set(Green, 0);
