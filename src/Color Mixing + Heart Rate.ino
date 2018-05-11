@@ -6,8 +6,8 @@
 // #include "RunningAverage.h"
 
 /* The following example demonstrates setting channels for all pins
-   on the ATmega328P or ATmega168 used on Arduino Uno, Pro Mini,
-   Nano and other boards. */
+on the ATmega328P or ATmega168 used on Arduino Uno, Pro Mini,
+Nano and other boards. */
 SOFTPWM_DEFINE_CHANNEL(0, DDRD, PORTD, PORTD0);  //Arduino pin 0
 SOFTPWM_DEFINE_CHANNEL(1, DDRD, PORTD, PORTD1);  //Arduino pin 1
 SOFTPWM_DEFINE_CHANNEL(2, DDRD, PORTD, PORTD2);  //Arduino pin 2
@@ -33,10 +33,11 @@ SOFTPWM_DEFINE_CHANNEL(19, DDRC, PORTC, PORTC5); //Arduino pin A5
 SoftwareSerial BlueBee(8,9); // permanently pins 8,9
 
 /* Here you make an instance of desired channel counts you want
-   with the default 256 PWM levels (0 ~ 255). */
+with the default 256 PWM levels (0 ~ 255). */
 SOFTPWM_DEFINE_OBJECT(20);
 
 const int numReadings = 1;
+int fadeSpeed = 7;
 // const long interval = 5000;            // timeout for dust sensor
 // const long automatic_interval = 6000; // timeout for automatic mode
 
@@ -66,6 +67,8 @@ int White2    =   12; //12
 
 // everything else
 int colorcontrolMode = 1;
+int lastColor = 0;
+int previousDB = 0, previousB = 0, previousG = 0, previousL = 0, previousY = 0, previousA = 0, previousR = 0, previousW1 = 0, previousW2 = 0;
 
 void setup() {
   BlueBee.begin(9600); // set baudrate according to BlueBee 4.0 baudrate
@@ -108,7 +111,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(DeepBlue, i);
+    setColor(DeepBlue, i, previousDB);
+    previousDB = i;
     i = 0;
     rb = 0;
     break;
@@ -122,7 +126,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(Blue, i);
+    setColor(Blue, i, previousB);
+    previousB = i;
     i = 0;
     rb = 0;
     break;
@@ -136,7 +141,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(Green, i);
+    setColor(Green, i, previousG);
+    previousG = i;
     i = 0;
     rb = 0;
     break;
@@ -150,7 +156,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(Lime, i);
+    setColor(Lime, i, previousL);
+    previousL = i;
     i = 0;
     rb = 0;
     break;
@@ -164,7 +171,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(Yellow, i);
+    setColor(Yellow, i, previousY);
+    previousY = i;
     i = 0;
     rb = 0;
     break;
@@ -178,7 +186,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(Amber, i);
+    setColor(Amber, i, previousA);
+    previousA = i;
     i = 0;
     rb = 0;
     break;
@@ -192,7 +201,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(Red, i);
+    setColor(Red, i,  previousR);
+    previousR = i;
     i = 0;
     rb = 0;
     break;
@@ -206,7 +216,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(White1, i);
+    setColor(White1, i, previousW1);
+    previousW1 = i;
     i = 0;
     rb = 0;
     break;
@@ -220,7 +231,8 @@ void ColorControl(){
       readbuffer[j] = 0;
       delay(1);
     }
-    setColor(White2, i);
+    setColor(White2, i, previousW2);
+    previousW2 = i;
     i = 0;
     rb = 0;
     break;
@@ -243,26 +255,46 @@ void readBluetooth(){
   }
 }
 
-void setColor(int _Color, int _PWM){
-  if (_PWM < 0){
-    _PWM = 0;
+void setColor(int _Color, int _value, int _previousValue){
+  if (_value < 0){
+    _value = 0;
   }
-  if (_PWM > 255){
-    _PWM = 255;
+  if (_value > 255){
+    _value = 255;
   }
-  Palatis::SoftPWM.set(_Color, _PWM);
+  if(_value > _previousValue){
+    for(int c = _previousValue; c <= _value; c++){
+      Palatis::SoftPWM.set(_Color, c);
+      delay(fadeSpeed);
+    }
+  }
+  else if(_value < _previousValue){
+    for(int c = _previousValue; c >= _value; c--){
+      Palatis::SoftPWM.set(_Color, c);
+      delay(fadeSpeed);
+    }
+  }
 }
 
 void resetColors(){
-  setColor(DeepBlue, 0);
-  setColor(Blue, 0);
-  setColor(Green, 0);
-  setColor(Lime, 0);
-  setColor(Yellow, 0);
-  setColor(Amber, 0);
-  setColor(Red, 0);
-  setColor(White1, 0);
-  setColor(White2, 0);
+  Palatis::SoftPWM.set(DeepBlue, 0);
+  Palatis::SoftPWM.set(Blue, 0);
+  Palatis::SoftPWM.set(Green, 0);
+  Palatis::SoftPWM.set(Lime, 0);
+  Palatis::SoftPWM.set(Yellow, 0);
+  Palatis::SoftPWM.set(Amber, 0);
+  Palatis::SoftPWM.set(Red, 0);
+  Palatis::SoftPWM.set(White1, 0);
+  Palatis::SoftPWM.set(White2, 0);
+  previousDB = 0;
+  previousB = 0;
+  previousG = 0;
+  previousL = 0;
+  previousY = 0;
+  previousA = 0;
+  previousR = 0;
+  previousW1 = 0;
+  previousW2 = 0;
   rb = 0;
 }
 
@@ -278,150 +310,158 @@ void ReceiveHeartData(){
     }
     switch (i) {
       case 10:
-      setColor(DeepBlue, 255);
-      setColor(Blue, 0);
-      setColor(Green, 0);
-      setColor(Lime, 0);
-      setColor(Yellow, 0);
-      setColor(Amber, 0);
-      setColor(Red, 0);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 1){
+        FadeInOut(DeepBlue, Blue, fadeSpeed);
+      }
+      else if(lastColor < 1){
+        Palatis::SoftPWM.set(DeepBlue, 255);
+      }
+      else if(lastColor == 1){
+        break;
+      }
+      lastColor = 1;
+      Palatis::SoftPWM.set(Blue, 0);
+      Palatis::SoftPWM.set(Green, 0);
+      Palatis::SoftPWM.set(Lime, 0);
+      Palatis::SoftPWM.set(Yellow, 0);
+      Palatis::SoftPWM.set(Amber, 0);
+      Palatis::SoftPWM.set(Red, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
       case 20:
-      setColor(DeepBlue, 0);
-      setColor(Blue, 255);
-      setColor(Green, 0);
-      setColor(Lime, 0);
-      setColor(Yellow, 0);
-      setColor(Amber, 0);
-      setColor(Red, 0);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 2){
+        FadeInOut(Blue, Green, fadeSpeed);
+      }
+      else if(lastColor < 2){
+        FadeInOut(Blue, DeepBlue, fadeSpeed);
+      }
+      else if(lastColor == 2){
+        break;
+      }
+      lastColor = 2;
+      Palatis::SoftPWM.set(DeepBlue, 0);
+      Palatis::SoftPWM.set(Green, 0);
+      Palatis::SoftPWM.set(Lime, 0);
+      Palatis::SoftPWM.set(Yellow, 0);
+      Palatis::SoftPWM.set(Amber, 0);
+      Palatis::SoftPWM.set(Red, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
       case 30:
-      setColor(DeepBlue, 0);
-      setColor(Blue, 0);
-      setColor(Green, 255);
-      setColor(Lime, 0);
-      setColor(Yellow, 0);
-      setColor(Amber, 0);
-      setColor(Red, 0);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 3){
+        FadeInOut(Green, Lime, fadeSpeed);
+      }
+      else if(lastColor < 3){
+        FadeInOut(Green, Blue, fadeSpeed);
+      }
+      else if(lastColor == 3){
+        break;
+      }
+      lastColor = 3;
+      Palatis::SoftPWM.set(DeepBlue, 0);
+      Palatis::SoftPWM.set(Blue, 0);
+      Palatis::SoftPWM.set(Lime, 0);
+      Palatis::SoftPWM.set(Yellow, 0);
+      Palatis::SoftPWM.set(Amber, 0);
+      Palatis::SoftPWM.set(Red, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
       case 40:
-      setColor(DeepBlue, 0);
-      setColor(Blue, 0);
-      setColor(Green, 0);
-      setColor(Lime, 255);
-      setColor(Yellow, 0);
-      setColor(Amber, 0);
-      setColor(Red, 0);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 4){
+        FadeInOut(Lime, Yellow, fadeSpeed);
+      }
+      else if(lastColor < 4){
+        FadeInOut(Lime, Green, fadeSpeed);
+      }
+      else if(lastColor == 4){
+        break;
+      }
+      lastColor = 4;
+      Palatis::SoftPWM.set(DeepBlue, 0);
+      Palatis::SoftPWM.set(Blue, 0);
+      Palatis::SoftPWM.set(Green, 0);
+      Palatis::SoftPWM.set(Yellow, 0);
+      Palatis::SoftPWM.set(Amber, 0);
+      Palatis::SoftPWM.set(Red, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
       case 50:
-      setColor(DeepBlue, 0);
-      setColor(Blue, 0);
-      setColor(Green, 0);
-      setColor(Lime, 0);
-      setColor(Yellow, 255);
-      setColor(Amber, 0);
-      setColor(Red, 0);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 5){
+        FadeInOut(Yellow, Amber, fadeSpeed);
+      }
+      else if(lastColor < 5){
+        FadeInOut(Yellow, Lime, fadeSpeed);
+      }
+      else if(lastColor == 5){
+        break;
+      }
+      lastColor = 5;
+      Palatis::SoftPWM.set(DeepBlue, 0);
+      Palatis::SoftPWM.set(Blue, 0);
+      Palatis::SoftPWM.set(Green, 0);
+      Palatis::SoftPWM.set(Lime, 0);
+      Palatis::SoftPWM.set(Amber, 0);
+      Palatis::SoftPWM.set(Red, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
       case 60:
-      setColor(DeepBlue, 0);
-      setColor(Blue, 0);
-      setColor(Green, 0);
-      setColor(Lime, 0);
-      setColor(Yellow, 0);
-      setColor(Amber, 255);
-      setColor(Red, 0);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 6){
+        FadeInOut(Amber, Red, fadeSpeed);
+      }
+      else if(lastColor < 6){
+        FadeInOut(Amber, Yellow, fadeSpeed);
+      }
+      else if(lastColor == 6){
+        break;
+      }
+      lastColor = 6;
+      Palatis::SoftPWM.set(DeepBlue, 0);
+      Palatis::SoftPWM.set(Blue, 0);
+      Palatis::SoftPWM.set(Green, 0);
+      Palatis::SoftPWM.set(Lime, 0);
+      Palatis::SoftPWM.set(Yellow, 0);
+      Palatis::SoftPWM.set(Red, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
       case 70:
-      setColor(DeepBlue, 0);
-      setColor(Blue, 0);
-      setColor(Green, 0);
-      setColor(Lime, 0);
-      setColor(Yellow, 0);
-      setColor(Amber, 0);
-      setColor(Red, 255);
-      setColor(White1, 0);
-      setColor(White2, 0);
+      if(lastColor > 7){
+        Palatis::SoftPWM.set(Red, 255);
+      }
+      else if(lastColor < 7){
+        FadeInOut(Red, Amber, fadeSpeed);
+      }
+      else if(lastColor == 7){
+        break;
+      }
+      lastColor = 7;
+      Palatis::SoftPWM.set(DeepBlue, 0);
+      Palatis::SoftPWM.set(Blue, 0);
+      Palatis::SoftPWM.set(Green, 0);
+      Palatis::SoftPWM.set(Lime, 0);
+      Palatis::SoftPWM.set(Yellow, 0);
+      Palatis::SoftPWM.set(Amber, 0);
+      Palatis::SoftPWM.set(White1, 0);
+      Palatis::SoftPWM.set(White2, 0);
       break;
     }
     i = 0;
     rb = 0;
     break;
   }
+}
 
-
-
-
-  // while (readbuffer[0] == 69) {
-  //   // while (BlueBee.available() > 0) {
-  //     Serial.print(readbuffer[0]);
-  //     Serial.print(", ");
-  //     Serial.println(readbuffer[1]);
-  //     previousMillis = currentMillis;
-  //     heartRate = readbuffer[1];
-  //     // heartRate = BlueBee.read(); // read the incoming byte:
-  //     Serial.print("Heart-rate: ");
-  //     Serial.println(heartRate);
-  //     total = total - heartRateIndex[readIndex]; // subtract the last reading:
-  //     heartRateIndex[readIndex] = heartRate; // read from ReceiveBluetoothData()
-  //     total = total + heartRateIndex[readIndex]; // add the reading to the total:
-  //     readIndex = readIndex + 1; // advance to the next position in the array:
-  //     if (readIndex >= numReadings) {   // if we're at the end of the array...
-  //     averageHeartRate = total / numReadings;   // calculate the average:
-  //     Serial.print("Average heart-rate: ");
-  //     Serial.println(averageHeartRate);
-  //     Serial.println("*****************************");
-  //     readIndex = 0;     // ...wrap around to the beginning:
-  //   }
-    // delay(1);        // delay in between reads for stability
-//     for (int j = 0; j < 2; j++) {
-//       readbuffer[j] = 0;
-//       rb = 0;
-//       delay(1);
-//     }
-//   // heart rate range from 50 ---> 135
-//   // if(averageHeartRate < 60){averageHeartRate = 60;}
-//   // if(averageHeartRate > 100){averageHeartRate = 100;}
-//   if(averageHeartRate < 110){
-//     setColor(DeepBlue, 0);
-//     setColor(Blue, 0);
-//     setColor(Green, 0);
-//     setColor(Lime, 100);
-//     setColor(Yellow, 0);
-//     setColor(Amber, 0);
-//     setColor(Red, 0);
-//     setColor(White1, 0);
-//     setColor(White2, 0);
-//   } else if(averageHeartRate > 110){
-//     setColor(DeepBlue, 0);
-//     setColor(Blue, 0);
-//     setColor(Green, 0);
-//     setColor(Lime, 0);
-//     setColor(Yellow, 100);
-//     setColor(Amber, 0);
-//     setColor(Red, 0);
-//     setColor(White1, 0);
-//     setColor(White2, 0);
-//   }
-//   break;
-// }
-  // j = (averageHeartRate - 60) * 6;
-  // k = (100 - averageHeartRate) * 6;
-  // analogWrite(warmLED, j);
-  // analogWrite(coolLED, k);
-  // delay(1);
-
-
-
+void FadeInOut(int _colorIn, int _colorOut, int _speed){
+  for(int k = 0; k <= 255; k++){
+    if(k > 255) {k = 255;}
+    if(k < 0)   {k = 0;}
+    Palatis::SoftPWM.set(_colorIn, k);
+    Palatis::SoftPWM.set(_colorOut, 255 - k);
+    delay(_speed);
+  }
 }
